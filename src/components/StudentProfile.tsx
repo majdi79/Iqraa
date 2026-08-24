@@ -110,10 +110,21 @@ export function StudentProfile({
     return studentSessions.filter(session => {
       if (periodFilter === 'all') return true;
       if (periodFilter === 'this_week') {
-        const day = now.getDay();
-        const diff = now.getDate() - day + (day === 6 ? 0 : -1);
-        const startOfWeek = new Date(now.setDate(diff)).toISOString().split('T')[0];
-        return session.date >= startOfWeek && session.date <= todayStr;
+        if (periodFilter === 'this_week') {
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 6 ? 0 : -1);
+
+  const start = new Date(now);
+  start.setDate(diff);
+
+  const startOfWeek = [
+    start.getFullYear(),
+    String(start.getMonth() + 1).padStart(2, '0'),
+    String(start.getDate()).padStart(2, '0'),
+  ].join('-');
+
+  return session.date >= startOfWeek && session.date <= todayStr;
+}
       }
       if (periodFilter === 'this_month') {
         const startOfMonth = getBahrainStartOfMonth();
