@@ -33,3 +33,4 @@
     "@types/express": "^4.17.21"
   }
 }
+npm install @supabase/supabase-js
