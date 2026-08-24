@@ -50,6 +50,8 @@ export function StudentList({
   const [isAdding, setIsAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newLevel, setNewLevel] = useState('');
+  const [newPhoneCountryCode, setNewPhoneCountryCode] = useState('+973');
+const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
 
   // Search and Filter States
@@ -172,12 +174,18 @@ export function StudentList({
     e.preventDefault();
     if (!newName.trim()) return;
     onAddStudent({
-      name: newName,
-      level: newLevel,
-      joinDate: new Date().toISOString().split('T')[0]
-    });
+  name: newName,
+  level: newLevel,
+  joinDate: new Date().toLocaleDateString('en-CA', {
+    timeZone: 'Asia/Bahrain'
+  }),
+  phoneCountryCode: newPhoneCountryCode,
+  phoneNumber: newPhoneNumber.trim() || undefined
+});
     setNewName('');
     setNewLevel('');
+    setNewPhoneCountryCode('+973');
+setNewPhoneNumber('');
     setIsAdding(false);
   };
 
@@ -429,6 +437,50 @@ export function StudentList({
                 placeholder="مثال: التمهيدي، الجزء الأول..."
               />
             </div>
+            <div>
+  <label className="block text-sm font-medium text-slate-700 mb-1">
+    رمز الدولة
+  </label>
+
+  <select
+    value={newPhoneCountryCode}
+    onChange={(e) => setNewPhoneCountryCode(e.target.value)}
+    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+  >
+    <option value="+973">🇧🇭 البحرين +973</option>
+    <option value="+966">🇸🇦 السعودية +966</option>
+    <option value="+965">🇰🇼 الكويت +965</option>
+    <option value="+971">🇦🇪 الإمارات +971</option>
+    <option value="+974">🇶🇦 قطر +974</option>
+    <option value="+968">🇴🇲 عمان +968</option>
+    <option value="+20">🇪🇬 مصر +20</option>
+    <option value="+962">🇯🇴 الأردن +962</option>
+    <option value="+961">🇱🇧 لبنان +961</option>
+  </select>
+</div>
+
+<div>
+  <label className="block text-sm font-medium text-slate-700 mb-1">
+    رقم التواصل
+  </label>
+
+  <div className="flex gap-2">
+    <div className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium">
+      {newPhoneCountryCode}
+    </div>
+
+    <input
+      type="tel"
+      value={newPhoneNumber}
+      onChange={(e) =>
+        setNewPhoneNumber(e.target.value.replace(/\D/g, ''))
+      }
+      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+      placeholder="مثال: 36000000"
+      dir="ltr"
+    />
+  </div>
+</div>
           </div>
           <div className="flex justify-end gap-3">
             <button
