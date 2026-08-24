@@ -21,8 +21,12 @@ import {
   CalendarClock,
   CalendarCheck,
   Send,
-  Plus
+  Plus,
+  Pencil,
+Trash2,
+Phone
 } from 'lucide-react';
+
 
 interface Props {
   student: Student;
@@ -33,6 +37,8 @@ interface Props {
   onOpenPaymentReminder?: (studentId: string) => void;
   onOpenFinancialReport?: (studentId: string) => void;
   onOpenSchedule?: (student: Student) => void;
+  onUpdateStudent?: (id: string, updates: Partial<Student>) => void;
+onDeleteStudent?: (id: string) => void;
 }
 
 type PeriodFilter = 'all' | 'this_week' | 'this_month' | 'custom';
@@ -45,9 +51,18 @@ export function StudentProfile({
   onOpenPeriodReport, 
   onOpenPaymentReminder, 
   onOpenFinancialReport,
-  onOpenSchedule
+  onOpenSchedule,
+  onUpdateStudent,
+onDeleteStudent,
 }: Props) {
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
+  const [isEditing, setIsEditing] = useState(false);
+const [editName, setEditName] = useState(student.name);
+const [editLevel, setEditLevel] = useState(student.level || '');
+const [editPhoneCountryCode, setEditPhoneCountryCode] =
+  useState(student.phoneCountryCode || '+973');
+const [editPhoneNumber, setEditPhoneNumber] =
+  useState(student.phoneNumber || '');
   const todayStr = getBahrainDate();
   const [customStart, setCustomStart] = useState<string>(() => {
     const d = new Date();
@@ -229,7 +244,29 @@ export function StudentProfile({
     text += `\n\nنسأل الله له التوفيق والسداد.\nمنهج اقرأ وارتق`;
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
   };
+const handleSaveStudent = () => {
+  if (!editName.trim()) return;
 
+  onUpdateStudent?.(student.id, {
+    name: editName.trim(),
+    level: editLevel.trim(),
+    phoneCountryCode: editPhoneCountryCode,
+    phoneNumber: editPhoneNumber.trim() || undefined,
+  });
+
+  setIsEditing(false);
+};
+
+const handleDeleteStudent = () => {
+  const confirmed = window.confirm(
+    `هل أنت متأكد من حذف الطالب "${student.name}"؟`
+  );
+
+  if (!confirmed) return;
+
+  onDeleteStudent?.(student.id);
+  onBack();
+};
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4">
       <button 
@@ -294,6 +331,21 @@ export function StudentProfile({
                 className="bg-white text-emerald-950 hover:bg-emerald-50 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none whitespace-nowrap text-sm"
               >
                 <BookOpen className="w-4 h-4" />
+                <button
+  onClick={() => setIsEditing(true)}
+  className="bg-blue-700 hover:bg-blue-600 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 text-sm"
+>
+  <Pencil className="w-4 h-4" />
+  تعديل البيانات
+</button>
+
+<button
+  onClick={handleDeleteStudent}
+  className="bg-red-700 hover:bg-red-600 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 text-sm"
+>
+  <Trash2 className="w-4 h-4" />
+  حذف الطالب
+</button>
                 تسجيل حلقة
               </button>
             </div>
@@ -541,6 +593,105 @@ export function StudentProfile({
           ))
         )}
       </div>
+      {isEditing && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+
+      <h3 className="text-xl font-bold text-emerald-900 mb-5">
+        تعديل بيانات الطالب
+      </h3>
+
+      <div className="space-y-4">
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            اسم الطالب
+          </label>
+
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            المستوى / المرحلة
+          </label>
+
+          <input
+            type="text"
+            value={editLevel}
+            onChange={(e) => setEditLevel(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            رمز الدولة
+          </label>
+
+          <select
+            value={editPhoneCountryCode}
+            onChange={(e) => setEditPhoneCountryCode(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
+          >
+            <option value="+973">🇧🇭 البحرين +973</option>
+            <option value="+966">🇸🇦 السعودية +966</option>
+            <option value="+965">🇰🇼 الكويت +965</option>
+            <option value="+971">🇦🇪 الإمارات +971</option>
+            <option value="+974">🇶🇦 قطر +974</option>
+            <option value="+968">🇴🇲 عمان +968</option>
+            <option value="+20">🇪🇬 مصر +20</option>
+            <option value="+962">🇯🇴 الأردن +962</option>
+            <option value="+961">🇱🇧 لبنان +961</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            رقم التواصل
+          </label>
+
+          <input
+            type="tel"
+            value={editPhoneNumber}
+            onChange={(e) =>
+              setEditPhoneNumber(e.target.value.replace(/\D/g, ''))
+            }
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
+            dir="ltr"
+          />
+        </div>
+
+      </div>
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          type="button"
+          onClick={() => setIsEditing(false)}
+          className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+        >
+          إلغاء
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSaveStudent}
+          className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg"
+        >
+          حفظ التعديلات
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }
