@@ -27,3 +27,28 @@ export function getBahrainTime(): string {
     hour12: false,
   }).format(new Date());
 }
+export function getBahrainDateObject(): Date {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: BAHRAIN_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+
+  const year = Number(parts.find(p => p.type === 'year')?.value);
+  const month = Number(parts.find(p => p.type === 'month')?.value);
+  const day = Number(parts.find(p => p.type === 'day')?.value);
+
+  return new Date(year, month - 1, day);
+}
+
+export function getBahrainStartOfMonth(): string {
+  const d = getBahrainDateObject();
+  const firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
+
+  return [
+    firstDay.getFullYear(),
+    String(firstDay.getMonth() + 1).padStart(2, '0'),
+    '01',
+  ].join('-');
+}
