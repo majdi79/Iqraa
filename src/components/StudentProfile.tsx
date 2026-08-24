@@ -1,3 +1,362 @@
+
+Yesterday 10:50 PM
+
+package.json
+File
+
+
+Screenshot 2026-08-24 231237.png
+
+
+StudentProfile.tsx
+TypeScript
+
+StudentList.tsx
+TypeScript
+
+أكيد. سنقسمها إلى خطوات صغيرة جدًا داخل StudentProfile.tsx حتى لا يختلط عليك شيء.
+
+افتح أولًا:
+
+GitHub → Iqraa → src → components → StudentProfile.tsx → Edit
+
+ثم اعمل الخطوات التالية واحدة واحدة:
+
+تعديل Props
+في أعلى الملف ستجد هذا الجزء:
+
+interface Props {
+  student: Student;
+  sessions: Session[];
+  onBack: () => void;
+  onNewSession: (student: Student) => void;
+  onOpenPeriodReport?: (studentId: string) => void;
+  onOpenPaymentReminder?: (studentId: string) => void;
+  onOpenFinancialReport?: (studentId: string) => void;
+  onOpenSchedule?: (student: Student) => void;
+}
+قبل القوس الأخير } أضف فقط:
+
+onUpdateStudent?: (id: string, updates: Partial<Student>) => void;
+onDeleteStudent?: (id: string) => void;
+فيصبح هكذا:
+
+interface Props {
+  student: Student;
+  sessions: Session[];
+  onBack: () => void;
+  onNewSession: (student: Student) => void;
+  onOpenPeriodReport?: (studentId: string) => void;
+  onOpenPaymentReminder?: (studentId: string) => void;
+  onOpenFinancialReport?: (studentId: string) => void;
+  onOpenSchedule?: (student: Student) => void;
+  onUpdateStudent?: (id: string, updates: Partial<Student>) => void;
+  onDeleteStudent?: (id: string) => void;
+}
+تعديل تعريف StudentProfile
+ابحث عن:
+
+export function StudentProfile({
+ستجد تحته أسماء مثل:
+
+student,
+sessions,
+onBack,
+onNewSession,
+onOpenPeriodReport,
+onOpenPaymentReminder,
+onOpenFinancialReport,
+onOpenSchedule
+غيّر آخر جزء ليصبح:
+
+onOpenFinancialReport,
+onOpenSchedule,
+onUpdateStudent,
+onDeleteStudent
+يعني فقط أضف:
+
+onUpdateStudent,
+onDeleteStudent
+قبل }: Props).
+
+إضافة الأيقونات
+في أعلى الملف يوجد import من lucide-react. حاليًا يحتوي على أيقونات كثيرة. 
+
+
+أضف داخل القائمة فقط:
+
+Pencil,
+Trash2,
+Phone
+مثال:
+
+import {
+  ArrowRight,
+  BookOpen,
+  Clock,
+  Calendar,
+  ...
+  Plus,
+  Pencil,
+  Trash2,
+  Phone
+} from 'lucide-react';
+إضافة حالات التعديل
+بعد هذا السطر تقريبًا:
+
+const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
+أضف:
+
+const [isEditing, setIsEditing] = useState(false);
+const [editName, setEditName] = useState(student.name);
+const [editLevel, setEditLevel] = useState(student.level || '');
+const [editPhoneCountryCode, setEditPhoneCountryCode] =
+  useState(student.phoneCountryCode || '+973');
+const [editPhoneNumber, setEditPhoneNumber] =
+  useState(student.phoneNumber || '');
+هذا الجزء سيحفظ القيم مؤقتًا عندما تفتح نافذة التعديل.
+
+إضافة دالة الحفظ والحذف
+استخدم Ctrl + F وابحث عن:
+
+return (
+وقبل return ( مباشرة الصق:
+
+const handleSaveStudent = () => {
+  if (!editName.trim()) return;
+
+  onUpdateStudent?.(student.id, {
+    name: editName.trim(),
+    level: editLevel.trim(),
+    phoneCountryCode: editPhoneCountryCode,
+    phoneNumber: editPhoneNumber.trim() || undefined,
+  });
+
+  setIsEditing(false);
+};
+
+const handleDeleteStudent = () => {
+  const confirmed = window.confirm(
+    `هل أنت متأكد من حذف الطالب "${student.name}"؟`
+  );
+
+  if (!confirmed) return;
+
+  onDeleteStudent?.(student.id);
+  onBack();
+};
+إضافة زري تعديل وحذف
+داخل بطاقة الطالب الرئيسية، عند الجزء الذي فيه أزرار مثل التقرير المالي وتذكير بالرسوم وتسجيل حلقة. هذا القسم موجود في ملفك حول بطاقة الطالب الرئيسية. 
+
+
+قبل زر تسجيل حلقة أضف:
+
+<button
+  onClick={() => setIsEditing(true)}
+  className="bg-blue-700 hover:bg-blue-600 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 text-sm"
+>
+  <Pencil className="w-4 h-4" />
+  تعديل البيانات
+</button>
+
+<button
+  onClick={handleDeleteStudent}
+  className="bg-red-700 hover:bg-red-600 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 text-sm"
+>
+  <Trash2 className="w-4 h-4" />
+  حذف الطالب
+</button>
+إضافة نافذة التعديل
+لا تعملها الآن إذا أردت نمشي خطوة خطوة. الأفضل أولًا تنفذ الخطوات من 1 إلى 6 فقط.
+
+بعدها أخبرني:
+
+تم حتى الخطوة 6
+
+وسأعطيك مكان نافذة التعديل بالضبط وبشكل أبسط.
+
+
+تم حتى الخطوة 6  
+
+ممتاز. الآن نعمل الخطوة 7 فقط: إضافة نافذة تعديل بيانات الطالب.
+
+داخل نفس الملف:
+
+src/components/StudentProfile.tsx
+
+استخدم Ctrl + F وابحث عن آخر return ( الخاص بالمكوّن، ثم انزل تقريبًا إلى نهاية الملف. قبل آخر إغلاق رئيسي للصفحة، أي قبل النهاية التي تشبه:
+
+    </div>
+  );
+}
+الصق هذا الكود قبل آخر </div> الرئيسية مباشرة:
+
+{isEditing && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+
+      <h3 className="text-xl font-bold text-emerald-900 mb-5">
+        تعديل بيانات الطالب
+      </h3>
+
+      <div className="space-y-4">
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            اسم الطالب
+          </label>
+
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            المستوى / المرحلة
+          </label>
+
+          <input
+            type="text"
+            value={editLevel}
+            onChange={(e) => setEditLevel(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            رمز الدولة
+          </label>
+
+          <select
+            value={editPhoneCountryCode}
+            onChange={(e) => setEditPhoneCountryCode(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
+          >
+            <option value="+973">🇧🇭 البحرين +973</option>
+            <option value="+966">🇸🇦 السعودية +966</option>
+            <option value="+965">🇰🇼 الكويت +965</option>
+            <option value="+971">🇦🇪 الإمارات +971</option>
+            <option value="+974">🇶🇦 قطر +974</option>
+            <option value="+968">🇴🇲 عمان +968</option>
+            <option value="+20">🇪🇬 مصر +20</option>
+            <option value="+962">🇯🇴 الأردن +962</option>
+            <option value="+961">🇱🇧 لبنان +961</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            رقم التواصل
+          </label>
+
+          <input
+            type="tel"
+            value={editPhoneNumber}
+            onChange={(e) =>
+              setEditPhoneNumber(e.target.value.replace(/\D/g, ''))
+            }
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
+            dir="ltr"
+          />
+        </div>
+
+      </div>
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          type="button"
+          onClick={() => setIsEditing(false)}
+          className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+        >
+          إلغاء
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSaveStudent}
+          className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg"
+        >
+          حفظ التعديلات
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+الهدف أن تصبح نهاية الملف تقريبًا بهذا الشكل:
+
+      <div className="space-y-4">
+        ...
+      </div>
+
+      {isEditing && (
+        ...
+      )}
+
+    </div>
+  );
+}
+لا تضع النافذة خارج return، ولا بعد );.
+
+بعدها اضغط Commit changes.
+
+ثم افتح البرنامج واضغط على تعديل البيانات داخل ملف أحد الطلاب. المفروض تظهر نافذة فيها: اسم الطالب، المستوى، رمز الدولة، ورقم التواصل.
+
+إذا ظهرت النافذة واشتغل زر حفظ التعديلات، اكتب لي تم وظهرت نافذة التعديل. وبعدها نضيف إظهار رقم الهاتف في ملف الطالب مع زر اتصال وWhatsApp مباشر.
+
+
+اعطني الكود كاملا لملف StudentProfile.tsx  
+
+نعم. بدل أن أعطيك أجزاء متفرقة، جهزت لك ملف StudentProfile.tsx كاملًا مبنيًا على ملفك الأصلي مع الحفاظ على سجل الجلسات، التقارير، المواعيد، المشاركة، والفلاتر الموجودة فيه. 
+
+
+أضفت داخله جميع التعديلات التي عملنا عليها: توقيت البحرين، تعديل بيانات الطالب، حذف الطالب مع تأكيد، رقم التواصل ورمز الدولة، البحرين +973 افتراضيًا، زر اتصال، وزر WhatsApp مباشر. كما أبقيت وظائف التقارير والمواعيد الحالية كما هي.
+
+حمّل الملف الكامل من هنا:
+
+تحميل StudentProfile_updated.tsx
+
+بعد التحميل، افتح في GitHub:
+
+Iqraa → src → components → StudentProfile.tsx
+
+ثم احذف محتوى الملف بالكامل والصق مكانه محتوى الملف الذي جهزته لك، أو ارفع محتواه مكان الملف الحالي، ثم اضغط Commit changes.
+
+مهم: الكود يفترض أنك أنشأت بالفعل src/bahrainTime.ts وفيه الوظائف الثلاث التي أضفناها سابقًا:
+
+getBahrainDate
+getBahrainDateObject
+getBahrainStartOfMonth
+ويفترض أيضًا أن types.ts يحتوي:
+
+phoneCountryCode?: string;
+phoneNumber?: string;
+وأن App.tsx يمرر:
+
+onUpdateStudent={updateStudent}
+onDeleteStudent={deleteStudent}
+وهذا يتوافق مع بنية StudentProfile الأصلية التي كانت تستقبل الطالب والجلسات وبقية وظائف التقارير والجدولة. 
+
+
+بعد عمل Commit changes راقب Vercel. إذا أصبح Ready 🟢 افتح طالبًا وجرب أولًا تعديل البيانات قبل تجربة الحذف.
+
+
+StudentProfile_updated.tsx
+Code
+
+
+Library
+/
+StudentProfile_updated.tsx
+
+
 import React, { useState, useMemo } from 'react';
 import { Student, Session } from '../types';
 import {
@@ -23,10 +382,10 @@ import {
   Send,
   Plus,
   Pencil,
-Trash2,
-Phone
+  Trash2,
+  Phone,
+  MessageCircle
 } from 'lucide-react';
-
 
 interface Props {
   student: Student;
@@ -38,7 +397,7 @@ interface Props {
   onOpenFinancialReport?: (studentId: string) => void;
   onOpenSchedule?: (student: Student) => void;
   onUpdateStudent?: (id: string, updates: Partial<Student>) => void;
-onDeleteStudent?: (id: string) => void;
+  onDeleteStudent?: (id: string) => void;
 }
 
 type PeriodFilter = 'all' | 'this_week' | 'this_month' | 'custom';
@@ -53,23 +412,20 @@ export function StudentProfile({
   onOpenFinancialReport,
   onOpenSchedule,
   onUpdateStudent,
-onDeleteStudent,
+  onDeleteStudent
 }: Props) {
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
-  const [isEditing, setIsEditing] = useState(false);
-const [editName, setEditName] = useState(student.name);
-const [editLevel, setEditLevel] = useState(student.level || '');
-const [editPhoneCountryCode, setEditPhoneCountryCode] =
-  useState(student.phoneCountryCode || '+973');
-const [editPhoneNumber, setEditPhoneNumber] =
-  useState(student.phoneNumber || '');
   const todayStr = getBahrainDate();
-  const [customStart, setCustomStart] = useState<string>(() => {
-    const d = new Date();
-    d.setDate(1);
-    return d.toISOString().split('T')[0];
-  });
+  const [customStart, setCustomStart] = useState<string>(() => getBahrainStartOfMonth());
   const [customEnd, setCustomEnd] = useState<string>(todayStr);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(student.name);
+  const [editLevel, setEditLevel] = useState(student.level || '');
+  const [editPhoneCountryCode, setEditPhoneCountryCode] = useState(
+    student.phoneCountryCode || '+973'
+  );
+  const [editPhoneNumber, setEditPhoneNumber] = useState(student.phoneNumber || '');
 
   // Helper for 12-hour Arabic time
   const formatTimeArabic = (timeStr?: string) => {
@@ -122,25 +478,26 @@ const [editPhoneNumber, setEditPhoneNumber] =
 
   const filteredSessions = useMemo(() => {
     const now = getBahrainDateObject();
+
     return studentSessions.filter(session => {
       if (periodFilter === 'all') return true;
+
       if (periodFilter === 'this_week') {
-        if (periodFilter === 'this_week') {
-  const day = now.getDay();
-  const diff = now.getDate() - day + (day === 6 ? 0 : -1);
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 6 ? 0 : -1);
 
-  const start = new Date(now);
-  start.setDate(diff);
+        const start = new Date(now);
+        start.setDate(diff);
 
-  const startOfWeek = [
-    start.getFullYear(),
-    String(start.getMonth() + 1).padStart(2, '0'),
-    String(start.getDate()).padStart(2, '0'),
-  ].join('-');
+        const startOfWeek = [
+          start.getFullYear(),
+          String(start.getMonth() + 1).padStart(2, '0'),
+          String(start.getDate()).padStart(2, '0'),
+        ].join('-');
 
-  return session.date >= startOfWeek && session.date <= todayStr;
-}
+        return session.date >= startOfWeek && session.date <= todayStr;
       }
+
       if (periodFilter === 'this_month') {
         const startOfMonth = getBahrainStartOfMonth();
         return session.date >= startOfMonth && session.date <= todayStr;
@@ -244,29 +601,40 @@ const [editPhoneNumber, setEditPhoneNumber] =
     text += `\n\nنسأل الله له التوفيق والسداد.\nمنهج اقرأ وارتق`;
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
   };
-const handleSaveStudent = () => {
-  if (!editName.trim()) return;
 
-  onUpdateStudent?.(student.id, {
-    name: editName.trim(),
-    level: editLevel.trim(),
-    phoneCountryCode: editPhoneCountryCode,
-    phoneNumber: editPhoneNumber.trim() || undefined,
-  });
+  const getInternationalPhone = () => {
+    if (!student.phoneNumber) return '';
 
-  setIsEditing(false);
-};
+    const countryCode = (student.phoneCountryCode || '+973').replace(/\D/g, '');
+    const phoneNumber = student.phoneNumber.replace(/\D/g, '').replace(/^0+/, '');
 
-const handleDeleteStudent = () => {
-  const confirmed = window.confirm(
-    `هل أنت متأكد من حذف الطالب "${student.name}"؟`
-  );
+    return `${countryCode}${phoneNumber}`;
+  };
 
-  if (!confirmed) return;
+  const handleSaveStudent = () => {
+    if (!editName.trim()) return;
 
-  onDeleteStudent?.(student.id);
-  onBack();
-};
+    onUpdateStudent?.(student.id, {
+      name: editName.trim(),
+      level: editLevel.trim(),
+      phoneCountryCode: editPhoneCountryCode,
+      phoneNumber: editPhoneNumber.trim() || undefined,
+    });
+
+    setIsEditing(false);
+  };
+
+  const handleDeleteStudent = () => {
+    const confirmed = window.confirm(
+      `هل أنت متأكد من حذف الطالب "${student.name}"؟\nسيتم حذف بيانات الطالب والجلسات والمدفوعات المرتبطة به.`
+    );
+
+    if (!confirmed) return;
+
+    onDeleteStudent?.(student.id);
+    onBack();
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4">
       <button 
@@ -293,6 +661,12 @@ const handleDeleteStudent = () => {
                   <Calendar className="w-4 h-4" />
                   تاريخ الانضمام: {student.joinDate}
                 </span>
+                {student.phoneNumber && (
+                  <span className="flex items-center gap-1.5 text-xs sm:text-sm" dir="ltr">
+                    <Phone className="w-4 h-4" />
+                    {student.phoneCountryCode || '+973'} {student.phoneNumber}
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex flex-wrap gap-2 w-full sm:w-auto">
@@ -326,26 +700,57 @@ const handleDeleteStudent = () => {
                 <Share2 className="w-4 h-4" />
                 مشاركة تقرير الفترة
               </a>
+              {student.phoneNumber && (
+                <>
+                  <a
+                    href={`tel:+${getInternationalPhone()}`}
+                    className="bg-emerald-800/80 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none whitespace-nowrap text-sm border border-emerald-700"
+                    title="الاتصال بالطالب أو ولي الأمر"
+                  >
+                    <Phone className="w-4 h-4 text-emerald-300" />
+                    اتصال
+                  </a>
+
+                  <a
+                    href={`https://wa.me/${getInternationalPhone()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-green-600 hover:bg-green-500 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none whitespace-nowrap text-sm"
+                    title="فتح محادثة واتساب"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    واتساب
+                  </a>
+                </>
+              )}
+
+              <button
+                onClick={() => {
+                  setEditName(student.name);
+                  setEditLevel(student.level || '');
+                  setEditPhoneCountryCode(student.phoneCountryCode || '+973');
+                  setEditPhoneNumber(student.phoneNumber || '');
+                  setIsEditing(true);
+                }}
+                className="bg-blue-700 hover:bg-blue-600 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none whitespace-nowrap text-sm"
+              >
+                <Pencil className="w-4 h-4" />
+                تعديل البيانات
+              </button>
+
+              <button
+                onClick={handleDeleteStudent}
+                className="bg-red-700 hover:bg-red-600 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none whitespace-nowrap text-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                حذف الطالب
+              </button>
+
               <button
                 onClick={() => onNewSession(student)}
                 className="bg-white text-emerald-950 hover:bg-emerald-50 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none whitespace-nowrap text-sm"
               >
                 <BookOpen className="w-4 h-4" />
-                <button
-  onClick={() => setIsEditing(true)}
-  className="bg-blue-700 hover:bg-blue-600 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 text-sm"
->
-  <Pencil className="w-4 h-4" />
-  تعديل البيانات
-</button>
-
-<button
-  onClick={handleDeleteStudent}
-  className="bg-red-700 hover:bg-red-600 text-white px-3.5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2 text-sm"
->
-  <Trash2 className="w-4 h-4" />
-  حذف الطالب
-</button>
                 تسجيل حلقة
               </button>
             </div>
@@ -593,105 +998,101 @@ const handleDeleteStudent = () => {
           ))
         )}
       </div>
+
       {isEditing && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+            <h3 className="text-xl font-bold text-emerald-900 mb-5">
+              تعديل بيانات الطالب
+            </h3>
 
-      <h3 className="text-xl font-bold text-emerald-900 mb-5">
-        تعديل بيانات الطالب
-      </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  اسم الطالب
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
 
-      <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  المستوى / المرحلة
+                </label>
+                <input
+                  type="text"
+                  value={editLevel}
+                  onChange={(e) => setEditLevel(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            اسم الطالب
-          </label>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  رمز الدولة
+                </label>
+                <select
+                  value={editPhoneCountryCode}
+                  onChange={(e) => setEditPhoneCountryCode(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="+973">🇧🇭 البحرين +973</option>
+                  <option value="+966">🇸🇦 السعودية +966</option>
+                  <option value="+965">🇰🇼 الكويت +965</option>
+                  <option value="+971">🇦🇪 الإمارات +971</option>
+                  <option value="+974">🇶🇦 قطر +974</option>
+                  <option value="+968">🇴🇲 عمان +968</option>
+                  <option value="+20">🇪🇬 مصر +20</option>
+                  <option value="+962">🇯🇴 الأردن +962</option>
+                  <option value="+961">🇱🇧 لبنان +961</option>
+                </select>
+              </div>
 
-          <input
-            type="text"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
-          />
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  رقم التواصل
+                </label>
+                <div className="flex gap-2" dir="ltr">
+                  <div className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium">
+                    {editPhoneCountryCode}
+                  </div>
+                  <input
+                    type="tel"
+                    value={editPhoneNumber}
+                    onChange={(e) =>
+                      setEditPhoneNumber(e.target.value.replace(/\D/g, ''))
+                    }
+                    className="flex-1 px-4 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="36000000"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                إلغاء
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveStudent}
+                className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors"
+              >
+                حفظ التعديلات
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            المستوى / المرحلة
-          </label>
-
-          <input
-            type="text"
-            value={editLevel}
-            onChange={(e) => setEditLevel(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            رمز الدولة
-          </label>
-
-          <select
-            value={editPhoneCountryCode}
-            onChange={(e) => setEditPhoneCountryCode(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
-          >
-            <option value="+973">🇧🇭 البحرين +973</option>
-            <option value="+966">🇸🇦 السعودية +966</option>
-            <option value="+965">🇰🇼 الكويت +965</option>
-            <option value="+971">🇦🇪 الإمارات +971</option>
-            <option value="+974">🇶🇦 قطر +974</option>
-            <option value="+968">🇴🇲 عمان +968</option>
-            <option value="+20">🇪🇬 مصر +20</option>
-            <option value="+962">🇯🇴 الأردن +962</option>
-            <option value="+961">🇱🇧 لبنان +961</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            رقم التواصل
-          </label>
-
-          <input
-            type="tel"
-            value={editPhoneNumber}
-            onChange={(e) =>
-              setEditPhoneNumber(e.target.value.replace(/\D/g, ''))
-            }
-            className="w-full px-4 py-2 border border-slate-200 rounded-lg"
-            dir="ltr"
-          />
-        </div>
-
-      </div>
-
-      <div className="flex justify-end gap-3 mt-6">
-
-        <button
-          type="button"
-          onClick={() => setIsEditing(false)}
-          className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg"
-        >
-          إلغاء
-        </button>
-
-        <button
-          type="button"
-          onClick={handleSaveStudent}
-          className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg"
-        >
-          حفظ التعديلات
-        </button>
-
-      </div>
-
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 }
