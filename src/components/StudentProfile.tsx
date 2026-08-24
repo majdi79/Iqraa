@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { Student, Session } from '../types';
-import { getBahrainDate } from '../bahrainTime';
+import {
+  getBahrainDate,
+  getBahrainDateObject,
+  getBahrainStartOfMonth
+} from '../bahrainTime';
 import { 
   ArrowRight, 
   BookOpen, 
@@ -102,7 +106,7 @@ export function StudentProfile({
   }, [sessions, student.id]);
 
   const filteredSessions = useMemo(() => {
-    const now = new Date();
+    const now = getBahrainDateObject();
     return studentSessions.filter(session => {
       if (periodFilter === 'all') return true;
       if (periodFilter === 'this_week') {
@@ -112,7 +116,7 @@ export function StudentProfile({
         return session.date >= startOfWeek && session.date <= todayStr;
       }
       if (periodFilter === 'this_month') {
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        const startOfMonth = getBahrainStartOfMonth();
         return session.date >= startOfMonth && session.date <= todayStr;
       }
       if (periodFilter === 'custom') {
