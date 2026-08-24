@@ -1,5 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Student } from '../types';
+import {
+  getBahrainDate,
+  getBahrainDateArabic
+} from '../bahrainTime';
 import { 
   Users, 
   Plus, 
@@ -60,7 +64,7 @@ const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [selectedLevelFilter, setSelectedLevelFilter] = useState<string>('all');
 
   // Today's date string in YYYY-MM-DD
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getBahrainDate();
 
   // Helper for 12-hour Arabic time
   const formatTimeArabic = (timeStr?: string) => {
@@ -88,12 +92,7 @@ const [newPhoneNumber, setNewPhoneNumber] = useState('');
   };
 
   // Today's Arabic full date for header
-  const todayArabicHeader = new Date().toLocaleDateString('ar-BH', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
+  const todayArabicHeader = getBahrainDateArabic();
 
   // Students scheduled for today
   const todayStudents = students.filter(s => s.nextSessionDate === todayStr);
@@ -176,7 +175,7 @@ const [newPhoneNumber, setNewPhoneNumber] = useState('');
     onAddStudent({
   name: newName,
   level: newLevel,
-  joinDate: new Date().toLocaleDateString('en-CA', {
+  joinDate: getBahrainDate(),toLocaleDateString('en-CA', {
     timeZone: 'Asia/Bahrain'
   }),
   phoneCountryCode: newPhoneCountryCode,
