@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Student, Session } from '../types';
+import { getBahrainDate } from '../bahrainTime';
 import { 
   ArrowRight, 
   BookOpen, 
@@ -43,7 +44,7 @@ export function StudentProfile({
   onOpenSchedule
 }: Props) {
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getBahrainDate();
   const [customStart, setCustomStart] = useState<string>(() => {
     const d = new Date();
     d.setDate(1);
