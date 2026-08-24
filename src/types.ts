@@ -5,6 +5,10 @@ export interface Student {
   joinDate: string;
   monthlyFee?: number;
   sessionRate?: number;
+
+  phoneCountryCode?: string;
+  phoneNumber?: string;
+
   nextSessionDate?: string;
   nextSessionTime?: string;
   nextSessionNotes?: string;
