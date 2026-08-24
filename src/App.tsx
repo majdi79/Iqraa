@@ -81,16 +81,18 @@ export default function App() {
 
 function IqraaApp({ user }: { user: User }) {
   const {
-    students,
-    sessions,
-    payments,
-    loading,
-    addStudent,
-    updateStudentSchedule,
-    addSession,
-    addPayment,
-    deletePayment
-  } = useStore();
+  students,
+  sessions,
+  payments,
+  loading,
+  addStudent,
+  updateStudent,
+  updateStudentSchedule,
+  addSession,
+  addPayment,
+  deletePayment,
+  deleteStudent
+} = useStore();
 
   const [view, setView] = useState<ViewState>('dashboard');
   const [activeStudent, setActiveStudent] = useState<Student | null>(null);
@@ -356,14 +358,20 @@ function IqraaApp({ user }: { user: User }) {
 
         {view === 'student_profile' && activeStudent && (
           <StudentProfile
-            student={
-              students.find(
-                (student) =>
-                  student.id === activeStudent.id
-              ) || activeStudent
-            }
-            sessions={sessions}
-            onBack={() => {
+  student={
+    students.find(
+      (student) => student.id === activeStudent.id
+    ) || activeStudent
+  }
+  sessions={sessions}
+  onUpdateStudent={updateStudent}
+  onDeleteStudent={deleteStudent}
+  onBack={() => {
+    setActiveStudent(null);
+    setView('dashboard');
+  }}
+  ...
+/>
               setActiveStudent(null);
               setView('dashboard');
             }}
