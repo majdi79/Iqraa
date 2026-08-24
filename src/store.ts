@@ -10,25 +10,15 @@ export function useStore() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // -----------------------------
-  // Convert Supabase rows to app
-  // -----------------------------
-
   const mapStudent = (row: any): Student => ({
     id: row.id,
     name: row.name,
     level: row.level || '',
     joinDate: row.join_date || '',
-    monthlyFee:
-      row.monthly_fee !== null && row.monthly_fee !== undefined
-        ? Number(row.monthly_fee)
-        : undefined,
-    sessionRate:
-      row.session_rate !== null && row.session_rate !== undefined
-        ? Number(row.session_rate)
-        : undefined,
+    monthlyFee: row.monthly_fee !== null && row.monthly_fee !== undefined ? Number(row.monthly_fee) : undefined,
+    sessionRate: row.session_rate !== null && row.session_rate !== undefined ? Number(row.session_rate) : undefined,
     phoneCountryCode: row.phone_country_code || '+973',
-phoneNumber: row.phone_number || undefined,
+    phoneNumber: row.phone_number || undefined,
     nextSessionDate: row.next_session_date || undefined,
     nextSessionTime: row.next_session_time || undefined,
     nextSessionNotes: row.next_session_notes || undefined,
@@ -57,29 +47,13 @@ phoneNumber: row.phone_number || undefined,
     notes: row.notes || undefined,
   });
 
-  // -----------------------------
-  // Load everything from Supabase
-  // -----------------------------
-
   const loadAll = useCallback(async () => {
     try {
-      const [studentsResult, sessionsResult, paymentsResult] =
-        await Promise.all([
-          supabase
-            .from('students')
-            .select('*')
-            .order('created_at', { ascending: true }),
-
-          supabase
-            .from('sessions')
-            .select('*')
-            .order('session_date', { ascending: false }),
-
-          supabase
-            .from('payments')
-            .select('*')
-            .order('payment_date', { ascending: false }),
-        ]);
+      const [studentsResult, sessionsResult, paymentsResult] = await Promise.all([
+        supabase.from('students').select('*').order('created_at', { ascending: true }),
+        supabase.from('sessions').select('*').order('session_date', { ascending: false }),
+        supabase.from('payments').select('*').order('payment_date', { ascending: false }),
+      ]);
 
       if (studentsResult.error) throw studentsResult.error;
       if (sessionsResult.error) throw sessionsResult.error;
@@ -95,30 +69,16 @@ phoneNumber: row.phone_number || undefined,
     }
   }, []);
 
-  // -----------------------------
-  // One-time localStorage migration
-  // -----------------------------
-
   const migrateLocalData = useCallback(async () => {
-    if (localStorage.getItem(MIGRATION_KEY) === 'true') {
-      return;
-    }
+    if (localStorage.getItem(MIGRATION_KEY) === 'true') return;
 
     const savedStudents = localStorage.getItem('iqra_students');
     const savedSessions = localStorage.getItem('iqra_sessions');
     const savedPayments = localStorage.getItem('iqra_payments');
 
-    const localStudents: Student[] = savedStudents
-      ? JSON.parse(savedStudents)
-      : [];
-
-    const localSessions: Session[] = savedSessions
-      ? JSON.parse(savedSessions)
-      : [];
-
-    const localPayments: Payment[] = savedPayments
-      ? JSON.parse(savedPayments)
-      : [];
+    const localStudents: Student[] = savedStudents ? JSON.parse(savedStudents) : [];
+    const localSessions: Session[] = savedSessions ? JSON.parse(savedSessions) : [];
+    const localPayments: Payment[] = savedPayments ? JSON.parse(savedPayments) : [];
 
     try {
       if (localStudents.length > 0) {
@@ -131,14 +91,13 @@ phoneNumber: row.phone_number || undefined,
             monthly_fee: student.monthlyFee ?? null,
             session_rate: student.sessionRate ?? null,
             phone_country_code: student.phoneCountryCode || '+973',
-phone_number: student.phoneNumber || null,
+            phone_number: student.phoneNumber || null,
             next_session_date: student.nextSessionDate || null,
             next_session_time: student.nextSessionTime || null,
             next_session_notes: student.nextSessionNotes || null,
           })),
           { onConflict: 'id' }
         );
-
         if (error) throw error;
       }
 
@@ -158,7 +117,6 @@ phone_number: student.phoneNumber || null,
           })),
           { onConflict: 'id' }
         );
-
         if (error) throw error;
       }
 
@@ -175,52 +133,31 @@ phone_number: student.phoneNumber || null,
           })),
           { onConflict: 'id' }
         );
-
         if (error) throw error;
       }
 
       localStorage.setItem(MIGRATION_KEY, 'true');
-
-      console.log('Iqraa local data migrated successfully to Supabase.');
     } catch (error) {
       console.error('Error migrating Iqraa data:', error);
     }
   }, []);
 
-  // -----------------------------
-  // Initial startup
-  // -----------------------------
-
   useEffect(() => {
     const initialize = async () => {
       setLoading(true);
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         setLoading(false);
         return;
       }
-
       await migrateLocalData();
       await loadAll();
     };
-
     initialize();
   }, [migrateLocalData, loadAll]);
 
-  // -----------------------------
-  // Students
-  // -----------------------------
-
   const addStudent = (student: Omit<Student, 'id'>) => {
-    const newStudent: Student = {
-      ...student,
-      id: crypto.randomUUID(),
-    };
-
+    const newStudent: Student = { ...student, id: crypto.randomUUID() };
     setStudents((prev) => [...prev, newStudent]);
 
     void (async () => {
@@ -232,12 +169,11 @@ phone_number: student.phoneNumber || null,
         monthly_fee: newStudent.monthlyFee ?? null,
         session_rate: newStudent.sessionRate ?? null,
         phone_country_code: newStudent.phoneCountryCode || '+973',
-phone_number: newStudent.phoneNumber || null,
+        phone_number: newStudent.phoneNumber || null,
         next_session_date: newStudent.nextSessionDate || null,
         next_session_time: newStudent.nextSessionTime || null,
         next_session_notes: newStudent.nextSessionNotes || null,
       });
-
       if (error) {
         console.error('Error adding student:', error);
         await loadAll();
@@ -247,65 +183,23 @@ phone_number: newStudent.phoneNumber || null,
     return newStudent;
   };
 
-  const updateStudent = (
-    id: string,
-    updates: Partial<Student>
-  ) => {
-    setStudents((prev) =>
-      prev.map((student) =>
-        student.id === id
-          ? { ...student, ...updates }
-          : student
-      )
-    );
-
+  const updateStudent = (id: string, updates: Partial<Student>) => {
+    setStudents((prev) => prev.map((student) => student.id === id ? { ...student, ...updates } : student));
     const dbUpdates: Record<string, any> = {};
 
     if ('name' in updates) dbUpdates.name = updates.name;
     if ('level' in updates) dbUpdates.level = updates.level;
-
-    if ('joinDate' in updates) {
-      dbUpdates.join_date = updates.joinDate || null;
-    }
-
-    if ('monthlyFee' in updates) {
-      dbUpdates.monthly_fee = updates.monthlyFee ?? null;
-    }
-
-    if ('sessionRate' in updates) {
-      dbUpdates.session_rate = updates.sessionRate ?? null;
-    }
-    if ('phoneCountryCode' in updates) {
-  dbUpdates.phone_country_code =
-    updates.phoneCountryCode || '+973';
-}
-
-if ('phoneNumber' in updates) {
-  dbUpdates.phone_number =
-    updates.phoneNumber || null;
-}
-
-    if ('nextSessionDate' in updates) {
-      dbUpdates.next_session_date =
-        updates.nextSessionDate || null;
-    }
-
-    if ('nextSessionTime' in updates) {
-      dbUpdates.next_session_time =
-        updates.nextSessionTime || null;
-    }
-
-    if ('nextSessionNotes' in updates) {
-      dbUpdates.next_session_notes =
-        updates.nextSessionNotes || null;
-    }
+    if ('joinDate' in updates) dbUpdates.join_date = updates.joinDate || null;
+    if ('monthlyFee' in updates) dbUpdates.monthly_fee = updates.monthlyFee ?? null;
+    if ('sessionRate' in updates) dbUpdates.session_rate = updates.sessionRate ?? null;
+    if ('phoneCountryCode' in updates) dbUpdates.phone_country_code = updates.phoneCountryCode || '+973';
+    if ('phoneNumber' in updates) dbUpdates.phone_number = updates.phoneNumber || null;
+    if ('nextSessionDate' in updates) dbUpdates.next_session_date = updates.nextSessionDate || null;
+    if ('nextSessionTime' in updates) dbUpdates.next_session_time = updates.nextSessionTime || null;
+    if ('nextSessionNotes' in updates) dbUpdates.next_session_notes = updates.nextSessionNotes || null;
 
     void (async () => {
-      const { error } = await supabase
-        .from('students')
-        .update(dbUpdates)
-        .eq('id', id);
-
+      const { error } = await supabase.from('students').update(dbUpdates).eq('id', id);
       if (error) {
         console.error('Error updating student:', error);
         await loadAll();
@@ -313,36 +207,17 @@ if ('phoneNumber' in updates) {
     })();
   };
 
-  const updateStudentSchedule = (
-    studentId: string,
-    schedule: {
-      nextSessionDate?: string;
-      nextSessionTime?: string;
-      nextSessionNotes?: string;
-    }
-  ) => {
+  const updateStudentSchedule = (studentId: string, schedule: { nextSessionDate?: string; nextSessionTime?: string; nextSessionNotes?: string }) => {
     updateStudent(studentId, schedule);
   };
 
   const deleteStudent = (id: string) => {
-    setStudents((prev) =>
-      prev.filter((student) => student.id !== id)
-    );
-
-    setSessions((prev) =>
-      prev.filter((session) => session.studentId !== id)
-    );
-
-    setPayments((prev) =>
-      prev.filter((payment) => payment.studentId !== id)
-    );
+    setStudents((prev) => prev.filter((student) => student.id !== id));
+    setSessions((prev) => prev.filter((session) => session.studentId !== id));
+    setPayments((prev) => prev.filter((payment) => payment.studentId !== id));
 
     void (async () => {
-      const { error } = await supabase
-        .from('students')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('students').delete().eq('id', id);
       if (error) {
         console.error('Error deleting student:', error);
         await loadAll();
@@ -350,16 +225,8 @@ if ('phoneNumber' in updates) {
     })();
   };
 
-  // -----------------------------
-  // Sessions
-  // -----------------------------
-
   const addSession = (session: Omit<Session, 'id'>) => {
-    const newSession: Session = {
-      ...session,
-      id: crypto.randomUUID(),
-    };
-
+    const newSession: Session = { ...session, id: crypto.randomUUID() };
     setSessions((prev) => [...prev, newSession]);
 
     if (session.nextSessionDate) {
@@ -379,14 +246,10 @@ if ('phoneNumber' in updates) {
         status: newSession.status,
         lesson_details: newSession.lessonDetails,
         notes: newSession.notes,
-        next_session_date:
-          newSession.nextSessionDate || null,
-        next_session_time:
-          newSession.nextSessionTime || null,
-        next_session_notes:
-          newSession.nextSessionNotes || null,
+        next_session_date: newSession.nextSessionDate || null,
+        next_session_time: newSession.nextSessionTime || null,
+        next_session_notes: newSession.nextSessionNotes || null,
       });
-
       if (error) {
         console.error('Error adding session:', error);
         await loadAll();
@@ -397,16 +260,9 @@ if ('phoneNumber' in updates) {
   };
 
   const deleteSession = (id: string) => {
-    setSessions((prev) =>
-      prev.filter((session) => session.id !== id)
-    );
-
+    setSessions((prev) => prev.filter((session) => session.id !== id));
     void (async () => {
-      const { error } = await supabase
-        .from('sessions')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('sessions').delete().eq('id', id);
       if (error) {
         console.error('Error deleting session:', error);
         await loadAll();
@@ -414,16 +270,8 @@ if ('phoneNumber' in updates) {
     })();
   };
 
-  // -----------------------------
-  // Payments
-  // -----------------------------
-
   const addPayment = (payment: Omit<Payment, 'id'>) => {
-    const newPayment: Payment = {
-      ...payment,
-      id: crypto.randomUUID(),
-    };
-
+    const newPayment: Payment = { ...payment, id: crypto.randomUUID() };
     setPayments((prev) => [newPayment, ...prev]);
 
     void (async () => {
@@ -436,7 +284,6 @@ if ('phoneNumber' in updates) {
         payment_method: newPayment.paymentMethod || null,
         notes: newPayment.notes || null,
       });
-
       if (error) {
         console.error('Error adding payment:', error);
         await loadAll();
@@ -447,16 +294,9 @@ if ('phoneNumber' in updates) {
   };
 
   const deletePayment = (id: string) => {
-    setPayments((prev) =>
-      prev.filter((payment) => payment.id !== id)
-    );
-
+    setPayments((prev) => prev.filter((payment) => payment.id !== id));
     void (async () => {
-      const { error } = await supabase
-        .from('payments')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('payments').delete().eq('id', id);
       if (error) {
         console.error('Error deleting payment:', error);
         await loadAll();
