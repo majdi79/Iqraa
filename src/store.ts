@@ -27,6 +27,8 @@ export function useStore() {
       row.session_rate !== null && row.session_rate !== undefined
         ? Number(row.session_rate)
         : undefined,
+    phoneCountryCode: row.phone_country_code || '+973',
+phoneNumber: row.phone_number || undefined,
     nextSessionDate: row.next_session_date || undefined,
     nextSessionTime: row.next_session_time || undefined,
     nextSessionNotes: row.next_session_notes || undefined,
@@ -128,6 +130,8 @@ export function useStore() {
             join_date: student.joinDate || null,
             monthly_fee: student.monthlyFee ?? null,
             session_rate: student.sessionRate ?? null,
+            phone_country_code: student.phoneCountryCode || '+973',
+phone_number: student.phoneNumber || null,
             next_session_date: student.nextSessionDate || null,
             next_session_time: student.nextSessionTime || null,
             next_session_notes: student.nextSessionNotes || null,
@@ -227,6 +231,8 @@ export function useStore() {
         join_date: newStudent.joinDate || null,
         monthly_fee: newStudent.monthlyFee ?? null,
         session_rate: newStudent.sessionRate ?? null,
+        phone_country_code: newStudent.phoneCountryCode || '+973',
+phone_number: newStudent.phoneNumber || null,
         next_session_date: newStudent.nextSessionDate || null,
         next_session_time: newStudent.nextSessionTime || null,
         next_session_notes: newStudent.nextSessionNotes || null,
@@ -269,6 +275,15 @@ export function useStore() {
     if ('sessionRate' in updates) {
       dbUpdates.session_rate = updates.sessionRate ?? null;
     }
+    if ('phoneCountryCode' in updates) {
+  dbUpdates.phone_country_code =
+    updates.phoneCountryCode || '+973';
+}
+
+if ('phoneNumber' in updates) {
+  dbUpdates.phone_number =
+    updates.phoneNumber || null;
+}
 
     if ('nextSessionDate' in updates) {
       dbUpdates.next_session_date =
